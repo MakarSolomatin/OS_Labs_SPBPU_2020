@@ -19,6 +19,7 @@ Child::Child(int pid) : pid(pid) {
     }
 
     setsid();
+    umask(027);
 
     // lock file
     int lock_file = open(lock_file_name, O_RDWR | O_CREAT, 0640);

@@ -9,17 +9,15 @@
 #include <string.h>
 #include "child.h"
 
-void prepare_parent() {
+void close_descriptors() {
     for (int i = getdtablesize(); i >= 0; --i) close(i);
-    int i = open("/dev/null",O_RDWR);
+    int i = open("/dev/stdout", O_RDWR);
     dup(i);
     dup(i);
-
-    umask(027);
 }
 
 int main() {
-    prepare_parent();
+    close_descriptors();
     Child child(fork());
     return 0;
 }

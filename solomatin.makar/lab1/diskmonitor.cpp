@@ -6,8 +6,8 @@
 DiskMonitor::DiskMonitor(const char *dir) {
     chdir(dir);
 
-    openlog("DiskMonitor", LOG_PID, LOG_DAEMON);
-    syslog(LOG_INFO, "DiskMonitor started!");
+    openlog("DiskMonitor", 0/*LOG_PID*/, LOG_USER/*LOG_DAEMON*/);
+    syslog(LOG_NOTICE/*LOG_INFO*/, "DiskMonitor started!");
 }
 
 DiskMonitor::~DiskMonitor() {
