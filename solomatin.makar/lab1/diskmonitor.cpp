@@ -5,7 +5,7 @@
 #include "diskmonitor.h"
 
 map<string, string> DiskMonitor::defaults = {
-    {"directory", "/etc/diskmonitor/config"}
+    {"directory", getenv("HOME")}
 };
 
 DiskMonitor::DiskMonitor(string config) {
