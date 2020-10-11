@@ -1,1 +1,1 @@
-g++ -o main -g main.cpp diskmonitor.cpp child.cpp
+g++ -o main -g main.cpp diskmonitor.cpp child.cpp config_parser.cpp

@@ -1,13 +1,28 @@
 #include <syslog.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <map>
 #include "diskmonitor.h"
 
-DiskMonitor::DiskMonitor(const char *dir) {
-    chdir(dir);
+map<string, string> DiskMonitor::defaults = {
+    {"directory", "/etc/diskmonitor/config"}
+};
 
+DiskMonitor::DiskMonitor(string config) {
     openlog("DiskMonitor", 0/*LOG_PID*/, LOG_USER/*LOG_DAEMON*/);
-    syslog(LOG_NOTICE/*LOG_INFO*/, "DiskMonitor started!");
+    runnable  = config_parser.parse(config);
+
+    if (!runnable) {
+        syslog(LOG_NOTICE/*LOG_INFO*/, "Error while parsing config, aborting...");
+        return;
+    }
+
+    const char *dir = config_parser.get("directory");
+    if (dir == nullptr) {
+        dir = defaults["directory"].c_str();
+        syslog(LOG_NOTICE/*LOG_INFO*/, "Could not find directory in config, using %s instead", dir);
+    }
+    chdir(dir);
 }
 
 DiskMonitor::~DiskMonitor() {
@@ -15,6 +30,9 @@ DiskMonitor::~DiskMonitor() {
 }
 
 void DiskMonitor::run() {
+    if (!runnable) return;
+
+    syslog(LOG_NOTICE/*LOG_INFO*/, "DiskMonitor started!");
     for (int i = 0;; i++) {
         sleep(1);
         syslog(LOG_INFO, "DiskMonitor up for %i seconds", i);
