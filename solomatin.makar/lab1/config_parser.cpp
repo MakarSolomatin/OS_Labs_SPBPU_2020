@@ -16,7 +16,7 @@ bool ConfigParser::parse(const string &file_name) {
 
     if (!fin.is_open()) {
         syslog(LOG_INFO, "Could not open %s file", file_name.c_str());
-        return 1;
+        return false;
     }
 
     string line;
@@ -38,7 +38,7 @@ bool ConfigParser::parse(const string &file_name) {
     }
 
     syslog(LOG_INFO, "Parsed %s file with parameters: %s", file_name.c_str(), parametersString.c_str());
-    return 0;
+    return true;
 }
 
 const char * ConfigParser::get(const string &key) {
