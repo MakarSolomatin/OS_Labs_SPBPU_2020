@@ -12,6 +12,8 @@ class DiskMonitor {
     ConfigParser config_parser;
     static map<string, string> defaults;
     static bool runnable;
+
+    void loadConfig(const string &config_file);
 public:
     DiskMonitor(string config_file = "/etc/diskmonitor/config");
     ~DiskMonitor();

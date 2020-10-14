@@ -38,6 +38,12 @@ Child::Child(int pid) : pid(pid) {
     write(lock_file, str, strlen(str));
     close(lock_file);
 
+    // close all owned file desrciptors
+    for (int i = getdtablesize(); i >= 0; --i) close(i);
+    int i = open("/dev/null", O_RDWR);
+    dup(i);
+    dup(i);
+
     signal(SIGHUP, handleHangUp);
     signal(SIGTERM, handleTerm);
 

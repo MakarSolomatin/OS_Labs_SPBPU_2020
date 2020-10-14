@@ -10,9 +10,13 @@ map<string, string> DiskMonitor::defaults = {
 
 bool DiskMonitor::runnable = false;
 
-DiskMonitor::DiskMonitor(string config) {
+void DiskMonitor::loadConfig(const string &config_file) {
+    runnable = config_parser.parse(config_file);
+}
+
+DiskMonitor::DiskMonitor(string config_file) {
     openlog("DiskMonitor", 0/*LOG_PID*/, LOG_USER/*LOG_DAEMON*/);
-    runnable = config_parser.parse(config);
+    loadConfig(config_file);
 
     if (!runnable) {
         syslog(LOG_NOTICE/*LOG_INFO*/, "Error while parsing config, aborting...");
