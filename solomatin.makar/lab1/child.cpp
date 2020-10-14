@@ -51,7 +51,6 @@ Child::~Child() {
 
 void Child::handleTerm(int sig) {
     DiskMonitor::finish();
-    exit(0);
 }
 
 void Child::handleHangUp(int sig) {
