@@ -50,6 +50,7 @@ Child::~Child() {
 }
 
 void Child::handleTerm(int sig) {
+    DiskMonitor::finish();
     exit(0);
 }
 

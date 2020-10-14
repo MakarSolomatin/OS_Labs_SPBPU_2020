@@ -7,12 +7,21 @@
 using namespace std;
 // class responsible for parsing config file
 class ConfigParser {
-    map<string, string> parameters;
-    static map<string, string> grammar; // grammar of config file
-
 public:
+    enum class Token { DIRECTORY }; // grammar token
     bool parse(const string &file_name); // parse config file
-    const char * get(const string &key); // returns null if key not exist
+    const char * get(Token key); // returns null if key not exist
+
+private:
+    static map<string, Token> grammar; // grammar of config file
+    map<Token, string> parameters;
+
+    string fieldName(Token token) {
+        for (auto const &entry : grammar) {
+            if (entry.second == token) return entry.first;
+        }
+        return "undefined field";
+    }
 };
 
 #endif /*CONFIG_PARSER_H*/

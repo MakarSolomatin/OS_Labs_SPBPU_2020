@@ -1,2 +1,2 @@
-* move config parsing in parent process
+* move config parsing in parent process - no, because we would reread config from child
 * learn about LOG0-LOG7

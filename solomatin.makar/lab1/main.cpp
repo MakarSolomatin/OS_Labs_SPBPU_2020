@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <string.h>
 #include "child.h"
+#include "config_parser.h"
 
 void close_descriptors() {
     for (int i = getdtablesize(); i >= 0; --i) close(i);
@@ -16,7 +17,7 @@ void close_descriptors() {
     dup(i);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     close_descriptors();
     Child child(fork());
     return 0;
