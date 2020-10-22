@@ -11,7 +11,7 @@
 #include "child.h"
 #include "config_parser.h"
 
-int main(int argc, char *argv[]) {
+auto main(int argc, char *argv[]) -> int {
     static const char *help =
         "Usage: \n"
         "diskmonitor [-f config_file]\n"

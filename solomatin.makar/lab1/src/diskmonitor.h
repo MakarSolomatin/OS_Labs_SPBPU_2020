@@ -13,6 +13,9 @@ class DiskMonitor {
     static map<string, string> defaults;
     static bool runnable;
 
+    // inotify instance descriptor
+    int inotify_fd;
+
     void loadConfig(const string &config_file);
 public:
     DiskMonitor(string config_file = "/etc/diskmonitor/config");

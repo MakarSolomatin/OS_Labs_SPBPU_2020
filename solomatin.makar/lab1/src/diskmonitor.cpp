@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <map>
+#include <sys/inotify.h>
 #include "diskmonitor.h"
 
 map<string, string> DiskMonitor::defaults = {
@@ -29,6 +30,11 @@ DiskMonitor::DiskMonitor(string config_file) {
         syslog(LOG_NOTICE/*LOG_INFO*/, "Could not find directory in config, using %s instead", dir);
     }
     chdir(dir);
+
+    // initializing inotify
+    //inotify_fd = inotify_init();
+
+    // TODO: rest inotify functions
 }
 
 DiskMonitor::~DiskMonitor() {
