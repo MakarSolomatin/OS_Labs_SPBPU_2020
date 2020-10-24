@@ -13,9 +13,9 @@
 
 auto main(int argc, char *argv[]) -> int {
     static const char *help =
-        "Usage: \n"
-        "diskmonitor [-f config_file]\n"
-        "-f            path to diskmonitor configuration file\n";
+        "\x1b[4mUsage\x1b[0m: \n"
+        "\x1b[1;32mdiskmonitor\x1b[0m [-f config_file]\n"
+        "\x1b[33m-f\x1b[0m     path to diskmonitor configuration file\n";
 
     string config_file = "/etc/diskmonitor/config";
     if (argc > 1) {

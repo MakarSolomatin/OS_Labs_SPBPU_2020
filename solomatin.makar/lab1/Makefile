@@ -1,3 +1,3 @@
 all: 
-	g++ src/*.cpp -o diskmonitor
+	g++ -g src/*.cpp -o diskmonitor
 

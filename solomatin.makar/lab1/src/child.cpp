@@ -15,10 +15,10 @@ Child::Child(int pid) : pid(pid) {
         perror("Error while forking");
         exit(1);
     } else if (pid > 0) {
-        exit(0);
-    }
+        exit(0); // parent process exits here
+    } // child process continues
 
-    setsid();
+    setsid(); // create session
     umask(027);
 
     // lock file

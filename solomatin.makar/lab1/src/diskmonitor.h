@@ -14,17 +14,20 @@ class DiskMonitor {
     static bool runnable;
 
     // inotify instance descriptor
-    int inotify_fd;
+    int inotify_fd = -1;
 
     void loadConfig(const string &config_file);
+
+    // recursively add watches starting with directory
+    bool addWatch(const string &dir);
 public:
     DiskMonitor(string config_file = "/etc/diskmonitor/config");
     ~DiskMonitor();
 
     void run();
-    static void finish() { 
+    static void finish() {
         syslog(LOG_NOTICE/*LOG_INFO*/, "Finishing DiskMonitor gracefully...");
-        runnable = false; 
+        runnable = false;
     }
 };
 
