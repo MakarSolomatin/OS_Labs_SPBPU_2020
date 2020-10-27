@@ -5,17 +5,23 @@
 
 // class represents daemon process
 class Child {
-    int pid;
     DiskMonitor *disk_monitor = nullptr;
-
-    const char *lock_file_name = "/var/run/lab1.pid";
+    const char *lockf_name = "/var/run/lab1.pid";
 
     // signal handlers
     static void handleTerm(int);
     static void handleHangUp(int);
-public:
-    Child(int pid);
+
+    Child();
     ~Child();
+    Child(const Child &) = delete;
+    Child& operator=(Child &) = delete;
+public:
+    static Child & instance() {
+        static Child instance; // can throw exceptions
+        return instance;
+    }
+    void run();
 };
 
 #endif /*CHILD_H*/

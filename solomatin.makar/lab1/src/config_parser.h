@@ -2,19 +2,20 @@
 #define CONFIG_PARSER_H
 
 #include <map>
+#include <vector>
 #include <string>
 
 using namespace std;
-// class responsible for parsing config file
 class ConfigParser {
 public:
     enum class Token { DIRECTORY }; // grammar token
-    bool parse(const string &file_name); // parse config file
-    const char * get(Token key); // returns null if key not exist
+    void parse(const string &file_name); // parse config file, throws exceptions
+    const vector<string> get(Token key); // returns null if key not exist
 
 private:
     static map<string, Token> grammar; // grammar of config file
-    map<Token, string> parameters;
+    static map<Token, vector<string>> defaults;
+    map<Token, vector<string>> parameters;
 
     string fieldName(Token token) {
         for (auto const &entry : grammar) {

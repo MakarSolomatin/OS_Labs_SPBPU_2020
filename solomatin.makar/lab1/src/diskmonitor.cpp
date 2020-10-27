@@ -13,46 +13,23 @@
 #define EVENT_SIZE  ( sizeof (struct inotify_event) )
 #define BUF_LEN     ( MAX_EVENTS * ( EVENT_SIZE + LEN_NAME ))
 
-map<string, string> DiskMonitor::defaults = {
-    {"directory", getenv("HOME")}
-};
-
 bool DiskMonitor::runnable = false;
 
-void DiskMonitor::loadConfig(const string &config_file) {
-    runnable = config_parser.parse(config_file);
-}
-
 DiskMonitor::DiskMonitor(string config_file) {
-    openlog("DiskMonitor", 0/*LOG_PID*/, LOG_USER/*LOG_DAEMON*/);
-    loadConfig(config_file);
+    config_parser.parse(config_file);
+    vector<string> dirs = config_parser.get(ConfigParser::Token::DIRECTORY);
 
-    if (!runnable) {
-        syslog(LOG_NOTICE/*LOG_INFO*/, "Error while parsing config, aborting...");
-        return;
-    }
-
-    const char *dir = config_parser.get(ConfigParser::Token::DIRECTORY);
-    if (dir == nullptr) {
-        dir = defaults["directory"].c_str();
-        syslog(LOG_NOTICE/*LOG_INFO*/, "Could not find directory in config, using %s instead", dir);
-    }
-    chdir(dir);
-
-    // initializing inotify
-    inotify_fd = inotify_init();
-
-    if (inotify_fd < 0) {
+    if ((inotify_fd = inotify_init()) < 0) {
         syslog(LOG_ERR, "Could not initialize inotify");
         return;
     }
 
-    runnable = addWatch(dir);
+    for (auto &dir : dirs) addWatch(dir);
 }
 
 DiskMonitor::~DiskMonitor() {
     close(inotify_fd);
-    closelog();
+    syslog(LOG_INFO, "Inotify file closed");
 }
 
 void DiskMonitor::run() {
@@ -113,7 +90,7 @@ bool DiskMonitor::addWatch(const string &dir) {
     // add watch for all subdirectories (1 level depth)
     string abs_dir;
     dirent *entry;
-    while (entry = readdir(dp)) {
+    while ((entry = readdir(dp))) {
         if (entry->d_type == DT_DIR) {
             abs_dir = dir + entry->d_name;
             const char * abs_dir_c = abs_dir.c_str();

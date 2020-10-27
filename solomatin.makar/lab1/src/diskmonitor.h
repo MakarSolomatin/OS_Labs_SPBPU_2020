@@ -7,16 +7,14 @@
 
 using namespace std;
 
-// class contains logic of disk monitor
+// disk monitoring logic encapsulated here
 class DiskMonitor {
     ConfigParser config_parser;
-    static map<string, string> defaults;
+    static map<string, string> defaults; // move to config_parser
     static bool runnable;
 
     // inotify instance descriptor
     int inotify_fd = -1;
-
-    void loadConfig(const string &config_file);
 
     // recursively add watches starting with directory
     bool addWatch(const string &dir);

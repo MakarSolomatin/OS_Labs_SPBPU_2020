@@ -1,3 +1,3 @@
 all: 
-	g++ -g src/*.cpp -o diskmonitor
+	g++ -Wall -Werror -g src/*.cpp -o diskmonitor
 

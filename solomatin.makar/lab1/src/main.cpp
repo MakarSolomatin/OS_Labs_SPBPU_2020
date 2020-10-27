@@ -25,6 +25,18 @@ auto main(int argc, char *argv[]) -> int {
         }
         config_file = argv[2];
     }
-    Child child(fork());
+    int pid = fork();
+    if (pid < 0) {
+        perror("Error while forking");
+        return 1;
+    }
+    else if (pid == 0) { //child process
+        try {
+            Child &child = Child::instance();
+            child.run();
+        } catch (const char *str) {
+            return 1;
+        }
+    }
     return 0;
 }
