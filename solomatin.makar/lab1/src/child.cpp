@@ -13,20 +13,28 @@
 #include "child.h"
 
 Child::Child() {
-    setsid(); // create session
-    umask(027); // drop group and other users permissions (rw-r-----)
     openlog("DiskMonitor", LOG_PID, LOG_LOCAL0);
+
+    setsid(); // create session
+    syslog(LOG_INFO, "New session was created");
+
+    umask(027); // drop group and other users permissions (rw-r-----)
+    syslog(LOG_INFO, "Applied umask");
+
     writePid(pidFileName);
+    syslog(LOG_INFO, "Updated pid file %s", pidFileName);
 
     // close all owned file desrciptors
     for (int i = getdtablesize(); i >= 0; --i) close(i);
     int i = open("/dev/null", O_RDWR);
     dup(i);
     dup(i);
+    syslog(LOG_INFO, "Closed all file descriptors before starting");
 
     // set callbacks for signal handling
     signal(SIGHUP, handleHangUp);
     signal(SIGTERM, handleTerm);
+    syslog(LOG_INFO, "Add SIGHUP and SIGTERM signal handlers");
 
     syslog(LOG_INFO, "Successfully initialized child process");
     diskMonitor = &DiskMonitor::instance();
@@ -55,13 +63,13 @@ void Child::writePid(const char *fname) {
     pidFile = open(fname, O_RDWR | O_CREAT, 0644);
     if (pidFile < 0) {
         perror("Could not open pid file");
-        throw "Error on child creation";
+        throw errno;
     }
 
-    if (lockf(pidFile, F_TLOCK, -1) < 0) {
-        perror("Could not lock pid file");
-        throw "Error on child creation";
-    }
+    // if (lockf(pidFile, F_TLOCK, -1) < 0) {
+    //     perror("Could not lock pid file");
+    //     throw errno;
+    // }
     string pidString = std::to_string(getpid());
     write(pidFile, &pidString[0], pidString.size());
 

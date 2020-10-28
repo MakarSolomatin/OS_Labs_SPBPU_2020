@@ -3,47 +3,48 @@
 
 #include <map>
 #include <syslog.h>
-#include "config_parser.h"
+#include <vector>
 
 using namespace std;
 
 // disk monitoring logic encapsulated here, SINGLETON
 class DiskMonitor {
-    ConfigParser configParser;
+    // main while loop stopper
     static bool runnable;
 
-    // watch descriptors
-    map<int, string> wds;
+    struct Configuration {
+        vector<string> watchPaths; // (watch descriptors + paths to directries)
+        unsigned int maxEvents; // maximum number of buffered watches
+
+        string toString();
+
+        static Configuration * defaultConfig();
+    } *config;
+    map<int, string> pathMap;
 
     // inotify instance descriptor
     int inotifyFd = -1;
 
-    // read config file and recreate all watches accordingly, throws exception on fail
-
     // recursively add watches starting with directory
-    void addWatch(const string &dir);
+    void addWatches();
 
     // remove all active watches
     void removeWatches();
 
+    // retrieve directories and max watches from file, PURE, MEMALLOC
+    Configuration * createConfig(const string &configFile);
+
     DiskMonitor();
 public:
     void applyConfig(const string &configFile);
-    ~DiskMonitor();
-
     void run();
-    void finish() {
-        runnable = false;
-        removeWatches();
-        syslog(LOG_INFO, "Removed all watches");
-        close(inotifyFd);
-        syslog(LOG_INFO, "Inotify file closed");
-    }
+    void finish();
 
     static DiskMonitor & instance() {
         static DiskMonitor instance;
         return instance;
     }
+    ~DiskMonitor();
 };
 
 #endif /*DISKMONITOR_H*/
