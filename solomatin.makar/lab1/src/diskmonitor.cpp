@@ -67,7 +67,7 @@ DiskMonitor::Configuration * DiskMonitor::createConfig(const string &fileName) {
 
         if (words.at(0) == "directory") {
             config->watchPaths.push_back(words.at(1));
-        } else if (words.at(0) == "max_evenets") {
+        } else if (words.at(0) == "max_events") {
             config->maxEvents = std::stoi(words.at(1));
         } else {
             terminate(i);
@@ -82,7 +82,7 @@ void DiskMonitor::applyConfig(const string &configFile) {
     Configuration *newConfig = createConfig(configFile);
 
     if (newConfig != nullptr) {
-        syslog(LOG_INFO, "New config was loaded: %s", newConfig->toString().c_str());
+        syslog(LOG_INFO, "%s config was loaded: %s", configFile.c_str(), newConfig->toString().c_str());
         if (config != nullptr) {
             removeWatches();
             delete config;

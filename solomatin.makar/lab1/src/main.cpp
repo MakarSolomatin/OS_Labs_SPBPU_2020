@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     static const char *help =
         "\x1b[4mUsage\x1b[0m: \n"
         "\x1b[1;32mdiskmonitor\x1b[0m [-f config_file]\n"
-        "\x1b[33m-f\x1b[0m     path to diskmonitor configuration file\n";
+        "\x1b[33m-f\x1b[0m     path to diskmonitor configuration file (default /etc/diskmonitor/config)\n";
 
     // get config file name
     string configFile = "/etc/diskmonitor/config";
