@@ -7,25 +7,42 @@
 
 using namespace std;
 
-// disk monitoring logic encapsulated here
+// disk monitoring logic encapsulated here, SINGLETON
 class DiskMonitor {
-    ConfigParser config_parser;
-    static map<string, string> defaults; // move to config_parser
+    ConfigParser configParser;
     static bool runnable;
 
+    // watch descriptors
+    map<int, string> wds;
+
     // inotify instance descriptor
-    int inotify_fd = -1;
+    int inotifyFd = -1;
+
+    // read config file and recreate all watches accordingly, throws exception on fail
 
     // recursively add watches starting with directory
-    bool addWatch(const string &dir);
+    void addWatch(const string &dir);
+
+    // remove all active watches
+    void removeWatches();
+
+    DiskMonitor();
 public:
-    DiskMonitor(string config_file = "/etc/diskmonitor/config");
+    void applyConfig(const string &configFile);
     ~DiskMonitor();
 
     void run();
-    static void finish() {
-        syslog(LOG_NOTICE/*LOG_INFO*/, "Finishing DiskMonitor gracefully...");
+    void finish() {
         runnable = false;
+        removeWatches();
+        syslog(LOG_INFO, "Removed all watches");
+        close(inotifyFd);
+        syslog(LOG_INFO, "Inotify file closed");
+    }
+
+    static DiskMonitor & instance() {
+        static DiskMonitor instance;
+        return instance;
     }
 };
 

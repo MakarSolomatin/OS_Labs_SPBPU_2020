@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <stdlib.h>
 #include <syslog.h>
 #include <stdarg.h>
@@ -14,26 +15,8 @@
 Child::Child() {
     setsid(); // create session
     umask(027); // drop group and other users permissions (rw-r-----)
-
     openlog("DiskMonitor", LOG_PID, LOG_LOCAL0);
-
-    // create lock file for daemon
-    int lock_file = open(lockf_name, O_RDWR | O_CREAT, 0644);
-    if (lock_file < 0) {
-        syslog(LOG_ERR, "Error while opening lock file %s", lockf_name);
-        throw "Error on child creation";
-    }
-
-    if (lockf(lock_file, F_TLOCK, 0) < 0) {
-        syslog(LOG_ERR, "Error while locking file %s", lockf_name);
-        throw "Error on child creation";
-    }
-
-    {
-        string pid_str = std::to_string(getpid());
-        write(lock_file, &pid_str[0], pid_str.size());
-    }
-    close(lock_file);
+    writePid(pidFileName);
 
     // close all owned file desrciptors
     for (int i = getdtablesize(); i >= 0; --i) close(i);
@@ -46,25 +29,63 @@ Child::Child() {
     signal(SIGTERM, handleTerm);
 
     syslog(LOG_INFO, "Successfully initialized child process");
-    disk_monitor = new DiskMonitor("/home/makar");
+    diskMonitor = &DiskMonitor::instance();
+}
+
+void Child::writePid(const char *fname) {
+    int pidFile;
+
+    if (access(fname, F_OK) != -1) {
+        int pidFile = open(fname, O_RDONLY, 0644);
+
+        // get pid from file
+        char buf[9];
+        read(pidFile, buf, 9);
+        if (strlen(buf)) {
+            int pid = atoi(buf);
+
+            // check if process with this pid exists
+            string procFileName = string("/proc/") + buf;
+            if (access(procFileName.c_str(), F_OK ) != -2) kill(pid, SIGTERM);
+        }
+
+        close(pidFile);
+    }
+
+    pidFile = open(fname, O_RDWR | O_CREAT, 0644);
+    if (pidFile < 0) {
+        perror("Could not open pid file");
+        throw "Error on child creation";
+    }
+
+    if (lockf(pidFile, F_TLOCK, -1) < 0) {
+        perror("Could not lock pid file");
+        throw "Error on child creation";
+    }
+    string pidString = std::to_string(getpid());
+    write(pidFile, &pidString[0], pidString.size());
+
+    close(pidFile);
 }
 
 Child::~Child() {
-    delete disk_monitor;
-
-    syslog(LOG_INFO, "Exiting gracefully. Good bye!");
+    syslog(LOG_INFO, "Child process terminate");
     closelog();
 }
 
 void Child::handleTerm(int sig) {
     syslog(LOG_INFO, "Received SIGTERM");
-    DiskMonitor::finish();
+    DiskMonitor::instance().finish();
 }
 
 void Child::handleHangUp(int sig) {
     syslog(LOG_INFO, "Received SIGHUP");
+    DiskMonitor::instance().applyConfig(Child::instance().configFile);
 }
 
-void Child::run() {
-    disk_monitor->run();
+void Child::run(const string &configFile) {
+    this->configFile = configFile;
+
+    diskMonitor->applyConfig(configFile);
+    diskMonitor->run();
 }

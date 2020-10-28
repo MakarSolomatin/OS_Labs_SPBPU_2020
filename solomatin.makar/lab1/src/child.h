@@ -3,10 +3,12 @@
 
 #include "diskmonitor.h"
 
-// class represents daemon process
+// class represents daemon process, SINGLETON
 class Child {
-    DiskMonitor *disk_monitor = nullptr;
-    const char *lockf_name = "/var/run/lab1.pid";
+    DiskMonitor *diskMonitor = nullptr;
+    string configFile;
+
+    const char *pidFileName = "/var/run/lab1.pid";
 
     // signal handlers
     static void handleTerm(int);
@@ -16,12 +18,14 @@ class Child {
     ~Child();
     Child(const Child &) = delete;
     Child& operator=(Child &) = delete;
+
+    void writePid(const char *fileName);
 public:
     static Child & instance() {
         static Child instance; // can throw exceptions
         return instance;
     }
-    void run();
+    void run(const string &configFile);
 };
 
 #endif /*CHILD_H*/

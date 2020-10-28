@@ -8,17 +8,17 @@
 
 using namespace std;
 map<string, ConfigParser::Token> ConfigParser::grammar = {
-    {"diretory", Token::DIRECTORY}
+    {"directory", Token::DIRECTORY}
 };
 map<ConfigParser::Token, vector<string>> ConfigParser::defaults = {
     {Token::DIRECTORY, {getenv("HOME")}}
 };
 
-void ConfigParser::parse(const string &file_name) {
-    ifstream fin(file_name);
+void ConfigParser::parse(const string &fileName) {
+    ifstream fin(fileName);
 
     if (!fin.is_open()) {
-        syslog(LOG_INFO, "Could not open config file %s", file_name.c_str());
+        syslog(LOG_INFO, "Could not open config file %s", fileName.c_str());
         throw "Error while loading config";
     }
 
@@ -37,15 +37,17 @@ void ConfigParser::parse(const string &file_name) {
         switch (token) {
         case Token::DIRECTORY:
             if (words.size() != 2) {
-                syslog(LOG_INFO, "Error while parsing config file %s: 'directory' has exactly one argument", file_name.c_str());
+                syslog(LOG_INFO, "Error while parsing config file %s: 'directory' has exactly one argument", fileName.c_str());
                 fin.close();
                 throw "Error while parsing config";
             }
+
+            parameters[Token::DIRECTORY].push_back(words.at(1));
             break;
         }
     }
 
-    syslog(LOG_INFO, "Config file %s parsed successfully", file_name.c_str());
+    syslog(LOG_INFO, "Config file %s parsed successfully", fileName.c_str());
     fin.close();
 }
 

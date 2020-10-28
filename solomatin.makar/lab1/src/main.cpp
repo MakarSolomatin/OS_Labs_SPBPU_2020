@@ -17,14 +17,15 @@ auto main(int argc, char *argv[]) -> int {
         "\x1b[1;32mdiskmonitor\x1b[0m [-f config_file]\n"
         "\x1b[33m-f\x1b[0m     path to diskmonitor configuration file\n";
 
-    string config_file = "/etc/diskmonitor/config";
+    string configFile = "/etc/diskmonitor/config";
     if (argc > 1) {
         if (argc != 3 || strcmp("-f", argv[1])) {
             puts(help);
-            exit(1);
+            return 1;
         }
-        config_file = argv[2];
+        configFile = argv[2];
     }
+
     int pid = fork();
     if (pid < 0) {
         perror("Error while forking");
@@ -33,7 +34,7 @@ auto main(int argc, char *argv[]) -> int {
     else if (pid == 0) { //child process
         try {
             Child &child = Child::instance();
-            child.run();
+            child.run(configFile);
         } catch (const char *str) {
             return 1;
         }

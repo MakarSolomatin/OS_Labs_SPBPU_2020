@@ -9,7 +9,7 @@ using namespace std;
 class ConfigParser {
 public:
     enum class Token { DIRECTORY }; // grammar token
-    void parse(const string &file_name); // parse config file, throws exceptions
+    void parse(const string &fileName); // parse config file, throws exceptions
     const vector<string> get(Token key); // returns null if key not exist
 
 private:
